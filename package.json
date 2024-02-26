@@ -10,7 +10,6 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/ui-pro": "^1.0.1",
     "@supabase/supabase-js": "^2.39.7",
     "nuxt": "^3.10.3",
     "vue": "^3.4.19",
