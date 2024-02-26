@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const supabase = useSupabaseClient();
-
+const user = useSupabaseUser();
+console.log(user.value);
 const signInWithOAuth = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: "http://localhost:3000/confirm",
       queryParams: {
         access_type: "offline",
         prompt: "consent",
