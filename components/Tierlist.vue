@@ -234,13 +234,14 @@ const isEditing = computed<boolean>(
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
+  margin: 0 20px;
 }
 .title {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100px;
-  aspect-ratio: 1/1;
+  height: 100%;
+  width: 110px;
   padding: 15px;
   border: 1px solid black;
 }
@@ -248,18 +249,22 @@ h2 {
   width: fit-content;
 }
 .row {
+  min-height: 120px;
   border: black;
   background-color: rgb(62, 62, 62);
-  padding: 15px;
+  padding: 10px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  height: 100px;
+  border-bottom: 1px solid black;
+  &:last-child {
+    border-bottom: none;
+  }
 }
 .item {
-  height: 100%;
+  height: 100px;
   aspect-ratio: 1/1;
   background-color: white;
   display: flex;

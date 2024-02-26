@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="the-tierlist">
     <Tierlist :items="data?.items" />
     <input type="text" v-model="newItemName" />
     <button @click="sendNewItem">Send new</button>
@@ -24,4 +24,9 @@ const sendNewItem = async () => {
 };
 </script>
 
-<style></style>
+<style>
+.the-tierlist {
+  margin-top: 20px;
+  width: 100%;
+}
+</style>
