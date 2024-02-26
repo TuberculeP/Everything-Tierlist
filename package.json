@@ -11,11 +11,15 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
+    "@types/lodash": "^4.14.202",
+    "lodash": "^4.17.21",
     "nuxt": "^3.10.3",
     "vue": "^3.4.19",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vuedraggable": "next"
   },
   "devDependencies": {
-    "@nuxtjs/supabase": "^1.1.6"
+    "@nuxtjs/supabase": "^1.1.6",
+    "sass": "^1.71.1"
   }
 }

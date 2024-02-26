@@ -1,6 +1,6 @@
 <template>
   <div>
-    <pre>{{ data?.items }}</pre>
+    <Tierlist :items="data?.items" />
     <input type="text" v-model="newItemName" />
     <button @click="sendNewItem">Send new</button>
   </div>

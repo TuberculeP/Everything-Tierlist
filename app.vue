@@ -10,6 +10,19 @@ const user = useSupabaseUser();
         <nuxt-link to="/logout">Logout</nuxt-link>
       </template>
     </header>
-    <NuxtPage />
+    <main>
+      <NuxtPage />
+    </main>
   </div>
 </template>
+<style>
+* {
+  font-family: Arial, sans-serif;
+  padding: 0;
+  margin: 0;
+}
+main {
+  max-width: 1000px;
+  margin: 20px auto;
+}
+</style>
