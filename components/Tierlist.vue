@@ -96,7 +96,7 @@
 <script lang="ts" setup>
 import type { ModelRef } from "vue";
 import Draggable from "vuedraggable";
-import { isEqual } from "lodash";
+import _ from "lodash";
 
 const user = useSupabaseUser();
 
@@ -220,12 +220,12 @@ async function saveChanges() {
   console.log(
     userSortedItems.value,
     sortedItems.value,
-    isEqual(userSortedItems.value, sortedItems.value)
+    _.isEqual(userSortedItems.value, sortedItems.value)
   );
 }
 
 const isEditing = computed<boolean>(
-  () => !isEqual(userSortedItems.value, sortedItems.value)
+  () => !_.isEqual(userSortedItems.value, sortedItems.value)
 );
 </script>
 
