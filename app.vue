@@ -6,15 +6,16 @@ const user = useSupabaseUser();
   <div class="tierlist-app">
     <header>
       <div class="logo">
-        <nuxt-link to="/">
+        <NuxtLink to="/">
           <img src="/logo.png" alt="" />
           <h1>Everything Tierlist</h1>
-        </nuxt-link>
+        </NuxtLink>
       </div>
       <nav>
         <template v-if="user">
-          <nuxt-link to="/account">Account</nuxt-link>
-          <nuxt-link to="/logout">Logout</nuxt-link>
+          <NuxtLink to="/toplist">Top List</NuxtLink>
+          <NuxtLink to="/account">Account</NuxtLink>
+          <NuxtLink to="/logout">Logout</NuxtLink>
         </template>
       </nav>
     </header>

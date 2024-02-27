@@ -111,8 +111,9 @@ const { start, finish } = useLoadingIndicator({
 const user = useSupabaseUser();
 const client = useSupabaseClient();
 
-const { data, refresh: refreshItems } = await useFetch("/api/items/all");
-const items = computed(() => data.value?.items);
+const { data: items, refresh: refreshItems } = await useFetch<
+  { id: number; name: string; user_id: string }[]
+>("/api/items/all");
 
 const getItem = (id: number) => {
   return items.value?.find((item) => item.id === id);

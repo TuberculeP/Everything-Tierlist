@@ -5,5 +5,5 @@ export default eventHandler(async (event) => {
 
   const { data } = await client.from("items").select("*");
 
-  return { items: data };
+  return data;
 });
