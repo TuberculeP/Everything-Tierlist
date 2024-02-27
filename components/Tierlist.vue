@@ -99,6 +99,9 @@
 import type { ModelRef } from "vue";
 import Draggable from "vuedraggable";
 import _ from "lodash";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+
+const { $toast } = useNuxtApp();
 
 const { start, finish } = useLoadingIndicator({
   duration: 2000,
@@ -106,17 +109,13 @@ const { start, finish } = useLoadingIndicator({
 });
 
 const user = useSupabaseUser();
+const client = useSupabaseClient();
 
-const items: ModelRef<any[]> = defineModel("items", {
-  default: [],
-});
-
-watch(items, (newItems) => {
-  console.log(newItems);
-});
+const { data, refresh: refreshItems } = await useFetch("/api/items/all");
+const items = computed(() => data.value?.items);
 
 const getItem = (id: number) => {
-  return items.value.find((item) => item.id === id);
+  return items.value?.find((item) => item.id === id);
 };
 
 const { data: tierlistRawData, refresh } = await useFetch("/api/tierlist/get");
@@ -125,7 +124,6 @@ const userSortedItems = computed(() => {
   //subscribers
   items.value;
   //logic
-  console.log("rebuilding...");
   const sortedItems: Record<string, any[]> = {
     sTier: [],
     aTier: [],
@@ -159,6 +157,7 @@ const userSortedItems = computed(() => {
         break;
     }
   });
+  if (!items.value) return sortedItems;
   sortedItems.unsorted.push(
     ...items.value.filter((item) => {
       return !Object.values(sortedItems)
@@ -166,7 +165,6 @@ const userSortedItems = computed(() => {
         .some((sortedItem) => sortedItem.id === item.id);
     })
   );
-  console.log(sortedItems);
   return sortedItems;
 });
 
@@ -226,11 +224,42 @@ async function saveChanges() {
   });
   await refresh();
   finish();
+  $toast.success("Tierlist saved !");
 }
 
 const isEditing = computed<boolean>(
   () => !_.isEqual(userSortedItems.value, sortedItems.value)
 );
+
+const isDataOutdated = ref(false);
+
+let realtimeChannel: RealtimeChannel;
+
+// Once page is mounted, listen to changes on the `collaborators` table and refresh collaborators when receiving event
+onMounted(() => {
+  // Real time listener for new workouts
+  realtimeChannel = client
+    .channel("public:items")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "items" },
+      () => {
+        if (!isDataOutdated.value) {
+          $toast.info("New items added, save and refresh to see new stuff !", {
+            duration: 0,
+          });
+        }
+        isDataOutdated.value = true;
+      }
+    );
+
+  realtimeChannel.subscribe();
+});
+
+// Don't forget to unsubscribe when user left the page
+onUnmounted(() => {
+  client.removeChannel(realtimeChannel);
+});
 </script>
 
 <style scoped lang="scss">

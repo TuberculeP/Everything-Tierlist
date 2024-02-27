@@ -1,11 +1,10 @@
 <template>
   <div class="the-tierlist">
-    <Tierlist :items="data?.items" />
+    <Tierlist />
   </div>
 </template>
 
 <script lang="ts" setup>
-const { data, refresh } = await useFetch("/api/items/all");
 </script>
 
 <style>
