@@ -18,7 +18,12 @@
         item-key="id"
       >
         <template #item="{ element: item }">
-          <div class="item">{{ item.name }}</div>
+          <div class="item">
+            {{ item.name }}
+            <button @click="viewingId = item.id">
+              <Icon name="mdi:information-outline" color="black" />
+            </button>
+          </div>
         </template>
       </Draggable>
       <div class="title" style="background: rgb(255, 223, 127)">
@@ -32,7 +37,12 @@
         item-key="id"
       >
         <template #item="{ element: item }">
-          <div class="item">{{ item.name }}</div>
+          <div class="item">
+            {{ item.name }}
+            <button @click="viewingId = item.id">
+              <Icon name="mdi:information-outline" color="black" />
+            </button>
+          </div>
         </template>
       </Draggable>
       <div class="title" style="background: rgb(255, 255, 127)">
@@ -46,7 +56,12 @@
         item-key="id"
       >
         <template #item="{ element: item }">
-          <div class="item">{{ item.name }}</div>
+          <div class="item">
+            {{ item.name }}
+            <button @click="viewingId = item.id">
+              <Icon name="mdi:information-outline" color="black" />
+            </button>
+          </div>
         </template>
       </Draggable>
       <div class="title" style="background: rgb(127, 255, 127)">
@@ -60,7 +75,12 @@
         item-key="id"
       >
         <template #item="{ element: item }">
-          <div class="item">{{ item.name }}</div>
+          <div class="item">
+            {{ item.name }}
+            <button @click="viewingId = item.id">
+              <Icon name="mdi:information-outline" color="black" />
+            </button>
+          </div>
         </template>
       </Draggable>
       <div class="title" style="background: rgb(127, 255, 255)">
@@ -74,7 +94,12 @@
         item-key="id"
       >
         <template #item="{ element: item }">
-          <div class="item">{{ item.name }}</div>
+          <div class="item">
+            {{ item.name }}
+            <button @click="viewingId = item.id">
+              <Icon name="mdi:information-outline" color="black" />
+            </button>
+          </div>
         </template>
       </Draggable>
       <div class="title">
@@ -88,38 +113,88 @@
         item-key="id"
       >
         <template #item="{ element: item }">
-          <div class="item">{{ item.name }}</div>
+          <div class="item">
+            {{ item.name }}
+            <button @click="viewingId = item.id">
+              <Icon name="mdi:information-outline" color="black" />
+            </button>
+          </div>
         </template>
       </Draggable>
     </div>
+    <div class="visualizer" v-if="viewingId">
+      <p>{{ viewingId }}</p>
+      <p v-if="viewingLoading">Loading data...</p>
+      <div
+        v-else
+        style="
+          height: 500px;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          text-align: center;
+        "
+      >
+        <h1>{{ getItem(viewingId)?.name }}</h1>
+        <p>{{ viewingData?.total_votes }} votes</p>
+        <Doughnut
+          :data="{
+            labels: ['S', 'A', 'B', 'C', 'D'],
+            datasets: [
+              {
+                backgroundColor: [
+                  'rgb(255, 127, 127)',
+                  'rgb(255, 223, 127)',
+                  'rgb(255, 255, 127)',
+                  'rgb(127, 255, 127)',
+                  'rgb(127, 255, 255)',
+                ],
+                data: [
+                  viewingData?.s_votes || 0,
+                  viewingData?.a_votes || 0,
+                  viewingData?.b_votes || 0,
+                  viewingData?.c_votes || 0,
+                  viewingData?.d_votes || 0,
+                ],
+              },
+            ],
+          }"
+          :options="{
+            responsive: true,
+            maintainAspectRatio: true,
+            borderColor: 'black',
+          }"
+        />
+      </div>
+    </div>
+    <p v-else style="margin-top: 30px">
+      Info <Icon name="mdi:information-outline" color="black" /> on one item to
+      fetch stats.
+    </p>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { ModelRef } from "vue";
 import Draggable from "vuedraggable";
 import _ from "lodash";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import { Doughnut } from "vue-chartjs";
 
 const { $toast } = useNuxtApp();
-
 const { start, finish } = useLoadingIndicator({
   duration: 2000,
   throttle: 200,
 });
-
 const user = useSupabaseUser();
 const client = useSupabaseClient();
-
 const { data: items, refresh: refreshItems } = await useFetch<
   { id: number; name: string; user_id: string }[]
 >("/api/items/all");
+const { data: tierlistRawData, refresh } = await useFetch("/api/tierlist/get");
 
 const getItem = (id: number) => {
   return items.value?.find((item) => item.id === id);
 };
-
-const { data: tierlistRawData, refresh } = await useFetch("/api/tierlist/get");
 
 const userSortedItems = computed(() => {
   //subscribers
@@ -261,6 +336,35 @@ onMounted(() => {
 onUnmounted(() => {
   client.removeChannel(realtimeChannel);
 });
+
+const viewingId = ref<number>(0);
+const viewingLoading = ref(false);
+const viewingData = ref<null | Record<string, number>>(null);
+watch(
+  () => viewingId.value,
+  async (newViewingId) => {
+    if (!newViewingId) return (viewingData.value = null);
+    viewingLoading.value = true;
+    const data = await $fetch<Record<string, number>>(`/api/items/stats`, {
+      method: "post",
+      body: { id: newViewingId },
+    });
+    viewingData.value = data;
+    viewingLoading.value = false;
+  }
+);
+/*
+const viewingData = computedAsync<null | Record<string, number>>(
+  async () => {
+    if (!viewingId.value) return null;
+    const data = await $fetch<Record<string, number>>(`/api/items/stats`, {
+      method: "post",
+      body: { id: viewingId.value },
+    });
+    return data;
+  }
+);
+*/
 </script>
 
 <style scoped lang="scss">
@@ -305,6 +409,15 @@ h2 {
   justify-content: center;
   align-items: center;
   text-align: center;
+  position: relative;
+  > button {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
 }
 
 .menu {
