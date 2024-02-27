@@ -2,6 +2,7 @@
 const user = useSupabaseUser();
 </script>
 <template>
+  <NuxtLoadingIndicator color="black" />
   <div class="tierlist-app">
     <header>
       <div class="logo">
@@ -39,6 +40,9 @@ main {
   margin: 0 auto;
   height: 100%;
   width: 100%;
+  > div {
+    margin: 15px;
+  }
 }
 header {
   display: flex;
