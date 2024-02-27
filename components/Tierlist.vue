@@ -7,7 +7,7 @@
       <button class="save" @click="saveChanges">Sauvegarder</button>
     </div>
     <div class="tierlist">
-      <div class="title">
+      <div class="title" style="background: rgb(255, 127, 127)">
         <h2>S</h2>
       </div>
       <Draggable
@@ -21,7 +21,7 @@
           <div class="item">{{ item.name }}</div>
         </template>
       </Draggable>
-      <div class="title">
+      <div class="title" style="background: rgb(255, 223, 127)">
         <h2>A</h2>
       </div>
       <Draggable
@@ -35,7 +35,7 @@
           <div class="item">{{ item.name }}</div>
         </template>
       </Draggable>
-      <div class="title">
+      <div class="title" style="background: rgb(255, 255, 127)">
         <h2>B</h2>
       </div>
       <Draggable
@@ -49,7 +49,7 @@
           <div class="item">{{ item.name }}</div>
         </template>
       </Draggable>
-      <div class="title">
+      <div class="title" style="background: rgb(127, 255, 127)">
         <h2>C</h2>
       </div>
       <Draggable
@@ -63,7 +63,7 @@
           <div class="item">{{ item.name }}</div>
         </template>
       </Draggable>
-      <div class="title">
+      <div class="title" style="background: rgb(127, 255, 255)">
         <h2>D</h2>
       </div>
       <Draggable
