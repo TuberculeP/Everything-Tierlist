@@ -1,8 +1,10 @@
 <template>
   <div>
     <div class="menu" v-if="isEditing">
-      <button @click="cancelChanges">Annuler les changements</button>
-      <button @click="saveChanges">Sauvegarder</button>
+      <button class="cancel" @click="cancelChanges">
+        Annuler les changements
+      </button>
+      <button class="save" @click="saveChanges">Sauvegarder</button>
     </div>
     <div class="tierlist">
       <div class="title">
@@ -98,6 +100,11 @@ import type { ModelRef } from "vue";
 import Draggable from "vuedraggable";
 import _ from "lodash";
 
+const { start, finish } = useLoadingIndicator({
+  duration: 2000,
+  throttle: 200,
+});
+
 const user = useSupabaseUser();
 
 const items: ModelRef<any[]> = defineModel("items", {
@@ -174,6 +181,7 @@ function cancelChanges() {
 }
 
 async function saveChanges() {
+  start();
   const user_id = user.value?.id as string;
   const allItems = unref(sortedItems);
   const getTier = (item: any): string | null => {
@@ -216,12 +224,8 @@ async function saveChanges() {
       newVotes,
     },
   });
-  refresh();
-  console.log(
-    userSortedItems.value,
-    sortedItems.value,
-    _.isEqual(userSortedItems.value, sortedItems.value)
-  );
+  await refresh();
+  finish();
 }
 
 const isEditing = computed<boolean>(
@@ -229,7 +233,7 @@ const isEditing = computed<boolean>(
 );
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .tierlist {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -272,7 +276,24 @@ h2 {
   align-items: center;
   text-align: center;
 }
-</style>
 
-const hole: Hobbit[] = []; const aHobbit = new Hobbit(); hole.push(aHobbit);
-assert(!hole.sale && !hole.deplaisant) assert(hole instanceof Hobbit[])
+.menu {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px;
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    &.cancel {
+      background-color: red;
+    }
+    &.save {
+      background-color: green;
+    }
+  }
+}
+</style>
