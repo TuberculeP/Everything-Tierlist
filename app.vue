@@ -1,4 +1,7 @@
 <script setup lang="ts">
+onMounted(() => {
+  document.title = "Everything Tierlist";
+});
 const user = useSupabaseUser();
 </script>
 <template>
