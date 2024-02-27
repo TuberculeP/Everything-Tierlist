@@ -1,6 +1,7 @@
 <template>
   <div>
     <h1>Everything Top List</h1>
+    <Podium :data="topListData" />
     <div class="toplist">
       <div class="row" v-for="({ name, total_score }, i) in topListData" :key="i + name">
         <p class="top">{{ i + 1 }}</p>
