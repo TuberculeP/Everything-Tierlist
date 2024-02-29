@@ -1,26 +1,40 @@
 <script setup lang="ts">
+const { id, avatar } = useUser() ?? {};
+const links = [
+  {
+    label: "My tierlist",
+    icon: "i-heroicons-presentation-chart-line",
+    to: "/",
+  },
+  {
+    label: "Top List",
+    icon: "i-heroicons-chart-bar",
+    to: "/toplist",
+  },
+  {
+    label: "Account",
+    to: "/account",
+    avatar: {
+      src: avatar,
+    },
+  },
+];
 onMounted(() => {
   document.title = "Everything Tierlist";
 });
-const user = useSupabaseUser();
 </script>
 <template>
   <NuxtLoadingIndicator color="black" />
   <div class="tierlist-app">
-    <header>
-      <div class="logo">
-        <NuxtLink to="/">
-          <img src="/logo.png" alt="" />
-          <h1>Everything Tierlist</h1>
-        </NuxtLink>
-      </div>
-      <nav>
-        <template v-if="user">
-          <NuxtLink to="/toplist">Top List</NuxtLink>
-          <NuxtLink to="/account">Account</NuxtLink>
-          <NuxtLink to="/logout">Logout</NuxtLink>
-        </template>
-      </nav>
+    <header
+      class="flex border-b border-gray-200 justify-between pt-2 px-6 pb-0"
+    >
+      <NuxtLink to="/" class="flex items-center gap-5">
+        <h1 class="font-semibold">Everything TierList</h1>
+      </NuxtLink>
+      <template v-if="id">
+        <UHorizontalNavigation :links="links" class="w-fit" />
+      </template>
     </header>
     <main>
       <NuxtPage />
@@ -28,59 +42,37 @@ const user = useSupabaseUser();
   </div>
 </template>
 <style lang="scss">
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
 * {
-  font-family: Arial, sans-serif;
+  font-family: "Inter", sans-serif;
   padding: 0;
   margin: 0;
   box-sizing: border-box;
 }
+
+:root {
+  font-size: 14px;
+}
+
 div.tierlist-app {
   display: grid;
   grid-template-rows: auto 1fr;
   height: 100vh;
 }
 main {
-  max-width: 1000px;
-  margin: 0 auto;
   height: 100%;
-  width: 100%;
+  overflow: scroll;
   > div {
-    margin: 15px;
+    width: 90%;
+
+    max-width: 1000px;
+    margin: 0 auto;
   }
-}
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid gray;
-  div.logo > a {
-    user-select: none;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    text-decoration: none;
-    color: black;
-    cursor: pointer;
-    img {
-      height: 60px;
-    }
-    h1 {
-      font-size: 1.5rem;
-    }
-  }
-  nav {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    a {
-      text-decoration: none;
-      color: black;
-      cursor: pointer;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
+  h1 {
+    font-weight: 600;
+    font-size: 2rem;
+    margin: 20px 0;
   }
 }
 </style>

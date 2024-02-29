@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{ with_pin: isNaPinned }">
     <div class="menu" v-if="isEditing">
       <button class="cancel" @click="cancelChanges">
         Annuler les changements
@@ -102,25 +102,28 @@
           </div>
         </template>
       </Draggable>
-      <div class="title">
-        <h2>N/A</h2>
+      <div class="n-a" :class="{ pinned: isNaPinned }">
+        <button class="pin" @click="isNaPinned = !isNaPinned">{{isNaPinned ? "Unpin" : "Pin"}}</button>
+        <div class="title">
+          <h2>N/A</h2>
+        </div>
+        <Draggable
+          v-model="sortedItems.unsorted"
+          tag="div"
+          class="row"
+          group="items"
+          item-key="id"
+        >
+          <template #item="{ element: item }">
+            <div class="item">
+              {{ item.name }}
+              <button @click="viewingId = item.id">
+                <Icon name="mdi:information-outline" color="black" />
+              </button>
+            </div>
+          </template>
+        </Draggable>
       </div>
-      <Draggable
-        v-model="sortedItems.unsorted"
-        tag="div"
-        class="row"
-        group="items"
-        item-key="id"
-      >
-        <template #item="{ element: item }">
-          <div class="item">
-            {{ item.name }}
-            <button @click="viewingId = item.id">
-              <Icon name="mdi:information-outline" color="black" />
-            </button>
-          </div>
-        </template>
-      </Draggable>
     </div>
     <div class="visualizer" v-if="viewingId">
       <p>{{ viewingId }}</p>
@@ -353,27 +356,22 @@ watch(
     viewingLoading.value = false;
   }
 );
-/*
-const viewingData = computedAsync<null | Record<string, number>>(
-  async () => {
-    if (!viewingId.value) return null;
-    const data = await $fetch<Record<string, number>>(`/api/items/stats`, {
-      method: "post",
-      body: { id: viewingId.value },
-    });
-    return data;
-  }
-);
-*/
+
+const isNaPinned = ref(false);
 </script>
 
 <style scoped lang="scss">
+.with_pin {
+  margin-bottom: 200px;
+}
 .tierlist {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
   margin: 0 20px;
+  row-gap: 20px;
 }
+
 .title {
   display: flex;
   justify-content: center;
@@ -386,6 +384,24 @@ const viewingData = computedAsync<null | Record<string, number>>(
 h2 {
   width: fit-content;
 }
+.n-a {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1/-1;
+  position: relative;
+}
+.n-a.pinned {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  grid-template-columns: auto 1fr;
+}
+.n-a > button.pin {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
 .row {
   min-height: 120px;
   border: black;
@@ -397,6 +413,9 @@ h2 {
   flex-wrap: wrap;
   gap: 10px;
   border-bottom: 1px solid black;
+  max-height: 200px;
+  overflow-y: auto;
+  position: relative;
   &:last-child {
     border-bottom: none;
   }

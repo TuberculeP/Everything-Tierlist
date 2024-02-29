@@ -1,31 +1,33 @@
 <template>
   <div>
     <h1>Account</h1>
-    <h3>Manage your added items</h3>
-    <ul>
-      <li class="search">
-        <input
-          type="text"
-          placeholder="Search for items ..."
+    <div class="border border-gray-200 p-4">
+      <div class="flex justify-between gap-5">
+        <UInput
+          icon="i-heroicons-magnifying-glass-20-solid"
           v-model="search"
+          :placeholder="`Search in ${filteredItems.length} items...`"
         />
-      </li>
-      <li :key="i + name + id" v-for="({ name, id }, i) in filteredItems">
-        <p>{{ name }}</p>
-        <button @click="removeItem(id)">
-          <Icon name="mdi:close-circle" color="black" />
-        </button>
-      </li>
-    </ul>
-    <p class="total">{{ data?.items?.length }} items</p>
-    <h3>Add new items</h3>
-    <div class="new-item">
-      <input
-        type="text"
-        v-model="newItemName"
-        placeholder="New item name ..."
+        <UPagination
+          v-model="page"
+          :page-count="pageCount"
+          :total="filteredItems.length"
+        />
+      </div>
+      <UTable
+        :rows="slicedItems"
+        v-model="selectedItems"
+        @select="selectItem"
       />
-      <button @click="sendNewItem">Send new</button>
+      <UDivider class="pb-5" />
+      <div class="flex gap-4">
+        <UInput
+          icon="i-heroicons-plus"
+          v-model="newItemName"
+          placeholder="New item name ..."
+        />
+        <UButton @click="sendNewItem">Send new</UButton>
+      </div>
     </div>
   </div>
 </template>
@@ -38,6 +40,8 @@ const { start, finish } = useLoadingIndicator({
   throttle: 200,
 });
 const search = ref("");
+const page = ref(1);
+const pageCount = 5;
 const filteredItems = computed(() => {
   return _.orderBy(
     data.value?.items?.filter((item) =>
@@ -47,6 +51,24 @@ const filteredItems = computed(() => {
     "desc"
   );
 });
+
+const slicedItems = computed(() =>
+  filteredItems.value.slice(
+    (page.value - 1) * pageCount,
+    page.value * pageCount
+  )
+);
+
+const selectedItems = ref<any[]>([]);
+
+function selectItem(row: any) {
+  const index = selectedItems.value.findIndex((item) => item.id === row.id);
+  if (index === -1) {
+    selectedItems.value.push(row);
+  } else {
+    selectedItems.value.splice(index, 1);
+  }
+}
 
 async function removeItem(id: number) {
   start();
@@ -77,9 +99,6 @@ const sendNewItem = async () => {
 </script>
 
 <style scoped lang="scss">
-h1 {
-  margin-bottom: 20px;
-}
 ul {
   list-style: none;
   margin: 20px 0 0;
