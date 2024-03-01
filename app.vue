@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { id, avatar } = useUser() ?? {};
+const user = useUser();
 const links = [
   {
     label: "My tierlist",
@@ -15,7 +15,7 @@ const links = [
     label: "Account",
     to: "/account",
     avatar: {
-      src: avatar,
+      src: user?.value.avatar,
     },
   },
 ];
@@ -32,7 +32,7 @@ onMounted(() => {
       <NuxtLink to="/" class="flex items-center gap-5">
         <h1 class="font-semibold">Everything TierList</h1>
       </NuxtLink>
-      <template v-if="id">
+      <template v-if="user?.id">
         <UHorizontalNavigation :links="links" class="w-fit" />
       </template>
     </header>

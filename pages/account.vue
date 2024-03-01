@@ -1,6 +1,16 @@
 <template>
   <div>
-    <h1>Account</h1>
+    <div class="flex justify-between items-center">
+      <h1>Account</h1>
+      <UButton
+        icon="i-heroicons-arrow-left-start-on-rectangle-20-solid"
+        color="red"
+        @click="navigateTo('/logout')"
+        class="ml-5"
+      >
+        Logout
+      </UButton>
+    </div>
     <div class="border border-gray-200 p-4">
       <div class="flex justify-between gap-5">
         <UInput

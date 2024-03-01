@@ -6,174 +6,123 @@
       </button>
       <button class="save" @click="saveChanges">Sauvegarder</button>
     </div>
+    <UContextMenu
+      v-model="isOpen"
+      :virtual-element="virtualElement"
+      :popper="{ placement: 'right' }"
+    >
+      <div class="p-4 flex flex-col">
+        <UTooltip :text="getItem(currentContextId)?.name">
+          <h3 class="font-semibold max-w-[200px] truncate">
+            {{ getItem(currentContextId)?.name }}
+          </h3>
+        </UTooltip>
+        <UDivider class="my-2" />
+        <UDropdown
+          :popper="{ placement: 'right' }"
+          :items="getContextDropdownItems(currentContextId)"
+        >
+          <template #item="{ item }">
+            <Icon
+              :style="'color: ' + item.color"
+              name="i-heroicons-folder-solid"
+            />
+            <p>{{ item.label }}</p>
+          </template>
+          <UButton
+            color="gray"
+            variant="ghost"
+            label="Send to"
+            trailing-icon="i-heroicons-chevron-right-20-solid"
+          />
+        </UDropdown>
+        <UAccordion :items="[{ label: 'Stats', slot: 'stats' }]">
+          <template #default="{ open }">
+            <UButton
+              color="gray"
+              variant="ghost"
+              >Display stats
+              <template #trailing>
+                <UIcon
+                  name="i-heroicons-chevron-right-20-solid"
+                  class="w-5 h-5 ms-auto transform transition-transform duration-200"
+                  :class="[open && 'rotate-90']"
+                /> </template
+            ></UButton>
+          </template>
+          <template #stats>
+            <div class="visualizer" v-if="viewingId">
+              <p v-if="viewingLoading">Loading data...</p>
+              <div class="w-[250px]" v-else>
+                <p>Stats on {{ viewingData?.total_votes }} votes</p>
+                <Doughnut
+                  :data="{
+                    labels: ['S', 'A', 'B', 'C', 'D'],
+                    datasets: [
+                      {
+                        backgroundColor: [
+                          'rgb(255, 127, 127)',
+                          'rgb(255, 223, 127)',
+                          'rgb(255, 255, 127)',
+                          'rgb(127, 255, 127)',
+                          'rgb(127, 255, 255)',
+                        ],
+                        data: [
+                          viewingData?.s_votes || 0,
+                          viewingData?.a_votes || 0,
+                          viewingData?.b_votes || 0,
+                          viewingData?.c_votes || 0,
+                          viewingData?.d_votes || 0,
+                        ],
+                      },
+                    ],
+                  }"
+                  :options="{
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    borderColor: 'rgb(55,65,81)',
+                  }"
+                />
+              </div>
+            </div>
+          </template>
+        </UAccordion>
+      </div>
+    </UContextMenu>
     <div class="tierlist">
-      <div class="title" style="background: rgb(255, 127, 127)">
-        <h2>S</h2>
-      </div>
-      <Draggable
-        v-model="sortedItems.sTier"
-        tag="div"
-        class="row"
-        group="items"
-        item-key="id"
+      <template
+        v-for="(tier, idx) in Object.keys(sortedItems)"
+        :key="tier + idx"
       >
-        <template #item="{ element: item }">
-          <div class="item">
-            {{ item.name }}
-            <button @click="viewingId = item.id">
-              <Icon name="mdi:information-outline" color="black" />
-            </button>
-          </div>
-        </template>
-      </Draggable>
-      <div class="title" style="background: rgb(255, 223, 127)">
-        <h2>A</h2>
-      </div>
-      <Draggable
-        v-model="sortedItems.aTier"
-        tag="div"
-        class="row"
-        group="items"
-        item-key="id"
-      >
-        <template #item="{ element: item }">
-          <div class="item">
-            {{ item.name }}
-            <button @click="viewingId = item.id">
-              <Icon name="mdi:information-outline" color="black" />
-            </button>
-          </div>
-        </template>
-      </Draggable>
-      <div class="title" style="background: rgb(255, 255, 127)">
-        <h2>B</h2>
-      </div>
-      <Draggable
-        v-model="sortedItems.bTier"
-        tag="div"
-        class="row"
-        group="items"
-        item-key="id"
-      >
-        <template #item="{ element: item }">
-          <div class="item">
-            {{ item.name }}
-            <button @click="viewingId = item.id">
-              <Icon name="mdi:information-outline" color="black" />
-            </button>
-          </div>
-        </template>
-      </Draggable>
-      <div class="title" style="background: rgb(127, 255, 127)">
-        <h2>C</h2>
-      </div>
-      <Draggable
-        v-model="sortedItems.cTier"
-        tag="div"
-        class="row"
-        group="items"
-        item-key="id"
-      >
-        <template #item="{ element: item }">
-          <div class="item">
-            {{ item.name }}
-            <button @click="viewingId = item.id">
-              <Icon name="mdi:information-outline" color="black" />
-            </button>
-          </div>
-        </template>
-      </Draggable>
-      <div class="title" style="background: rgb(127, 255, 255)">
-        <h2>D</h2>
-      </div>
-      <Draggable
-        v-model="sortedItems.dTier"
-        tag="div"
-        class="row"
-        group="items"
-        item-key="id"
-      >
-        <template #item="{ element: item }">
-          <div class="item">
-            {{ item.name }}
-            <button @click="viewingId = item.id">
-              <Icon name="mdi:information-outline" color="black" />
-            </button>
-          </div>
-        </template>
-      </Draggable>
-      <div class="n-a" :class="{ pinned: isNaPinned }">
-        <button class="pin" @click="isNaPinned = !isNaPinned">{{isNaPinned ? "Unpin" : "Pin"}}</button>
-        <div class="title">
-          <h2>N/A</h2>
+        <div class="title" :style="{ background: tierData[tier].color }">
+          <h2>{{ tierData[tier].label }}</h2>
         </div>
         <Draggable
-          v-model="sortedItems.unsorted"
+          v-model="sortedItems[tier]"
           tag="div"
           class="row"
           group="items"
           item-key="id"
+          @end="changes++"
         >
           <template #item="{ element: item }">
-            <div class="item">
-              {{ item.name }}
-              <button @click="viewingId = item.id">
-                <Icon name="mdi:information-outline" color="black" />
-              </button>
-            </div>
+            <UCard
+              class="w-100 text-sm"
+              @contextmenu.prevent="onContextMenu(item.id)"
+              :ui="{ body: '' }"
+            >
+              <div class="p-2">
+                <UTooltip :text="item.name"
+                  ><p class="truncate max-w-[150px]">
+                    {{ item.name }}
+                  </p></UTooltip
+                >
+              </div>
+            </UCard>
           </template>
         </Draggable>
-      </div>
+      </template>
     </div>
-    <div class="visualizer" v-if="viewingId">
-      <p>{{ viewingId }}</p>
-      <p v-if="viewingLoading">Loading data...</p>
-      <div
-        v-else
-        style="
-          height: 500px;
-          display: flex;
-          align-items: center;
-          flex-direction: column;
-          text-align: center;
-        "
-      >
-        <h1>{{ getItem(viewingId)?.name }}</h1>
-        <p>{{ viewingData?.total_votes }} votes</p>
-        <Doughnut
-          :data="{
-            labels: ['S', 'A', 'B', 'C', 'D'],
-            datasets: [
-              {
-                backgroundColor: [
-                  'rgb(255, 127, 127)',
-                  'rgb(255, 223, 127)',
-                  'rgb(255, 255, 127)',
-                  'rgb(127, 255, 127)',
-                  'rgb(127, 255, 255)',
-                ],
-                data: [
-                  viewingData?.s_votes || 0,
-                  viewingData?.a_votes || 0,
-                  viewingData?.b_votes || 0,
-                  viewingData?.c_votes || 0,
-                  viewingData?.d_votes || 0,
-                ],
-              },
-            ],
-          }"
-          :options="{
-            responsive: true,
-            maintainAspectRatio: true,
-            borderColor: 'black',
-          }"
-        />
-      </div>
-    </div>
-    <p v-else style="margin-top: 30px">
-      Info <Icon name="mdi:information-outline" color="black" /> on one item to
-      fetch stats.
-    </p>
   </div>
 </template>
 
@@ -182,6 +131,8 @@ import Draggable from "vuedraggable";
 import _ from "lodash";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { Doughnut } from "vue-chartjs";
+import { useMouse, useWindowScroll } from "@vueuse/core";
+import { _borderWidth } from "#tailwind-config/theme";
 
 const { $toast } = useNuxtApp();
 const { start, finish } = useLoadingIndicator({
@@ -190,6 +141,9 @@ const { start, finish } = useLoadingIndicator({
 });
 const user = useSupabaseUser();
 const client = useSupabaseClient();
+const { x, y } = useMouse();
+const { y: windowY } = useWindowScroll();
+
 const { data: items, refresh: refreshItems } = await useFetch<
   { id: number; name: string; user_id: string }[]
 >("/api/items/all");
@@ -209,8 +163,6 @@ const userSortedItems = computed(() => {
     bTier: [],
     cTier: [],
     dTier: [],
-    eTier: [],
-    fTier: [],
     unsorted: [],
   };
   // assign tiered items
@@ -250,11 +202,50 @@ const userSortedItems = computed(() => {
 const sortedItems = ref<Record<string, any[]>>({ ...userSortedItems.value });
 
 watch(userSortedItems, (newUserSortedItems) => {
+  console.log("???");
   sortedItems.value = { ...newUserSortedItems };
 });
 
+const getItemTier = (id: number) => {
+  const item = getItem(id);
+  if (!item) return "unsorted";
+  if (sortedItems.value.sTier.includes(item)) return "sTier";
+  if (sortedItems.value.aTier.includes(item)) return "aTier";
+  if (sortedItems.value.bTier.includes(item)) return "bTier";
+  if (sortedItems.value.cTier.includes(item)) return "cTier";
+  if (sortedItems.value.dTier.includes(item)) return "dTier";
+  return "unsorted";
+};
+
+const tierData: Record<string, { label: string; color: string }> = {
+  sTier: {
+    label: "S",
+    color: "rgb(255, 127, 127)",
+  },
+  aTier: {
+    label: "A",
+    color: "rgb(255, 223, 127)",
+  },
+  bTier: {
+    label: "B",
+    color: "rgb(255, 255, 127)",
+  },
+  cTier: {
+    label: "C",
+    color: "rgb(127, 255, 127)",
+  },
+  dTier: {
+    label: "D",
+    color: "rgb(127, 255, 255)",
+  },
+  unsorted: {
+    label: "Unsorted",
+    color: "rgb(127, 127, 127)",
+  },
+};
+
 function cancelChanges() {
-  sortedItems.value = { ...userSortedItems.value };
+  sortedItems.value = _.cloneDeep({ ...unref(userSortedItems) });
 }
 
 async function saveChanges() {
@@ -305,10 +296,12 @@ async function saveChanges() {
   finish();
   $toast.success("Tierlist saved !");
 }
-
-const isEditing = computed<boolean>(
-  () => !_.isEqual(userSortedItems.value, sortedItems.value)
-);
+const changes = ref(0);
+const isEditing = computed<boolean>(() => {
+  changes.value;
+  console.log(toRaw(userSortedItems.value), toRaw(sortedItems.value));
+  return !_.isEqual(toRaw(userSortedItems.value), toRaw(sortedItems.value));
+});
 
 const isDataOutdated = ref(false);
 
@@ -358,12 +351,53 @@ watch(
 );
 
 const isNaPinned = ref(false);
+const isOpen = ref(false);
+const virtualElement = ref({ getBoundingClientRect: () => ({}) });
+
+const currentContextId = ref(0);
+function onContextMenu(id: number) {
+  currentContextId.value = id;
+  viewingId.value = id;
+
+  const top = unref(y) - unref(windowY);
+  const left = unref(x);
+
+  virtualElement.value.getBoundingClientRect = () => ({
+    width: 0,
+    height: 0,
+    top,
+    left,
+  });
+
+  isOpen.value = true;
+}
+
+const getContextDropdownItems = (id: number, currentTier: string) => {
+  return [
+    Object.values(tierData).map((tier) => ({
+      ...tier,
+      click: () => {
+        const label = tier.label.toLowerCase();
+        const newTier = label === "unsorted" ? label : label + "Tier";
+        const oldTier = getItemTier(id);
+        const itemIdx = sortedItems.value[oldTier].findIndex(
+          (item: any) => item.id === id
+        );
+        const item = sortedItems.value[oldTier][itemIdx];
+        if (!item) return;
+        sortedItems.value[newTier] = [...sortedItems.value[newTier], item];
+        sortedItems.value[oldTier] = sortedItems.value[oldTier].filter(
+          (item: any) => item.id !== id
+        );
+        changes.value++;
+        isOpen.value = false;
+      },
+    })),
+  ];
+};
 </script>
 
 <style scoped lang="scss">
-.with_pin {
-  margin-bottom: 200px;
-}
 .tierlist {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -379,32 +413,13 @@ const isNaPinned = ref(false);
   height: 100%;
   width: 110px;
   padding: 15px;
-  border: 1px solid black;
 }
 h2 {
   width: fit-content;
 }
-.n-a {
-  display: grid;
-  grid-template-columns: subgrid;
-  grid-column: 1/-1;
-  position: relative;
-}
-.n-a.pinned {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100vw;
-  grid-template-columns: auto 1fr;
-}
-.n-a > button.pin {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-}
+
 .row {
   min-height: 120px;
-  border: black;
   background-color: rgb(62, 62, 62);
   padding: 10px;
   display: flex;
@@ -412,31 +427,9 @@ h2 {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  border-bottom: 1px solid black;
   max-height: 200px;
   overflow-y: auto;
   position: relative;
-  &:last-child {
-    border-bottom: none;
-  }
-}
-.item {
-  height: 100px;
-  aspect-ratio: 1/1;
-  background-color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  > button {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-  }
 }
 
 .menu {
